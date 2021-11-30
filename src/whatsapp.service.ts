@@ -30,19 +30,10 @@ export const whatsappProvider = {
         const base64Data = base64Qr.replace(/^data:image\/png;base64,/, '');
 
         fs.writeFile(
-          '/var/www/html/aipos_bplus_mutasi/assets/last_request_whatsapp.txt',
-          DateTime.now().toISO(),
-          function(err) {
-            if (err) {
-              console.log(err);
-            }
-          },
-        );
-        fs.writeFile(
-          '/var/www/html/aipos_bplus_mutasi/assets/qr.png',
+          '/www/www-root/192.168.80.90/assets/qr.png',
           base64Data,
           'base64',
-          function(err) {
+          function (err) {
             // console.log("GAGAL LEK, reason" + err);
           },
         );
