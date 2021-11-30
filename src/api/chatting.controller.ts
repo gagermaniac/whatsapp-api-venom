@@ -1,5 +1,5 @@
-import {Body, Controller, Inject, NotImplementedException, Post} from '@nestjs/common';
-import {ApiOperation, ApiTags} from "@nestjs/swagger";
+import { Body, Controller, Inject, NotImplementedException, Post } from '@nestjs/common';
+import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import {
     Chat,
     MessageContactVcard,
@@ -10,7 +10,7 @@ import {
     MessageReply,
     MessageText
 } from "./all.dto";
-import {Whatsapp} from "venom-bot";
+import { Whatsapp } from "venom-bot";
 
 @Controller('api')
 @ApiTags('chatting')
@@ -24,7 +24,7 @@ export class ChattingController {
     }
 
     @Post('/send-message')
-    @ApiOperation({summary: 'Send a message message'})
+    @ApiOperation({ summary: 'Send a message message' })
     sendText(@Body() message: MessageText) {
         return this.whatsapp.sendText(message.number + '@c.us', message.message)
     }
@@ -40,7 +40,7 @@ export class ChattingController {
     }
 
     @Post('/send-image')
-    @ApiOperation({summary: 'NOT IMPLEMENTED YET'})
+    @ApiOperation({ summary: 'NOT IMPLEMENTED YET' })
     sendImage(@Body() message: MessageImage) {
         throw new NotImplementedException();
         // TODO: Accept image URL, download it and then send with path
@@ -48,7 +48,7 @@ export class ChattingController {
     }
 
     @Post('/send-file')
-    @ApiOperation({summary: 'NOT IMPLEMENTED YET'})
+    @ApiOperation({ summary: 'NOT IMPLEMENTED YET' })
     sendFile(@Body() message: MessageFile) {
         throw new NotImplementedException();
         // TODO: Accept File URL, download it and then send with path
@@ -56,7 +56,7 @@ export class ChattingController {
     }
 
     @Post('/reply')
-    @ApiOperation({summary: 'Reply to a message message'})
+    @ApiOperation({ summary: 'Reply to a message message' })
     reply(@Body() message: MessageReply) {
         return this.whatsapp.reply(message.number + '@c.us', message.message, message.reply_to)
     }

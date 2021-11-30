@@ -1,48 +1,54 @@
-import {Controller, Get, Inject, Post} from '@nestjs/common';
-import {ApiTags} from "@nestjs/swagger";
-import {Whatsapp} from "venom-bot";
-
+import { Controller, Get, Inject, Post } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { Whatsapp } from 'venom-bot';
 
 @Controller('api')
 @ApiTags('device')
 export class DeviceController {
-    constructor(@Inject('WHATSAPP') private whatsapp: Whatsapp) {
-    }
+  constructor(@Inject('WHATSAPP') private whatsapp: Whatsapp) {}
 
-    @Post('/killServiceWorker')
-    killServiceWorker() {
-        return this.whatsapp.killServiceWorker()
-    }
+  @Get('/health')
+  getHealth() {
+    return true;
+  }
 
-    @Post('/restartService')
-    restartService() {
-        return this.whatsapp.restartService()
-    }
+  @Post('/killServiceWorker')
+  killServiceWorker() {
+    return this.whatsapp.killServiceWorker();
+  }
 
-    @Get('/getHostDevice')
-    getHostDevice() {
-        return this.whatsapp.getHostDevice()
-    }
+  @Post('/restartService')
+  restartService() {
+    return this.whatsapp.restartService();
+  }
 
-    @Get('/getConnectionState')
-    getConnectionState() {
-        return this.whatsapp.getConnectionState()
-    }
+  @Get('/getHostDevice')
+  getHostDevice() {
+    return this.whatsapp.getHostDevice();
+  }
 
-    @Get('/getBatteryLevel')
-    getBatteryLevel() {
-        return this.whatsapp.getBatteryLevel()
-    }
+  @Get('/getConnectionState')
+  getConnectionState() {
+    return this.whatsapp.getConnectionState();
+  }
 
-    @Get('/isConnected')
-    isConnected() {
-        return this.whatsapp.isConnected()
-    }
+  @Get('/getBatteryLevel')
+  getBatteryLevel() {
+    return this.whatsapp.getBatteryLevel();
+  }
 
-    @Get('/getWAVersion')
-    getWAVersion() {
-        return this.whatsapp.getWAVersion()
-    }
+  @Get('/isConnected')
+  isConnected() {
+    return this.whatsapp.isConnected();
+  }
 
+  @Get('/getWAVersion')
+  getWAVersion() {
+    return this.whatsapp.getWAVersion();
+  }
+
+  @Get('/logout')
+  logout() {
+    return this.whatsapp.logout();
+  }
 }
-

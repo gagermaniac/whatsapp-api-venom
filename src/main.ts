@@ -1,15 +1,16 @@
-import {NestFactory} from '@nestjs/core';
-import {AppModule} from './app.module';
-import {DocumentBuilder, SwaggerModule} from "@nestjs/swagger";
-import {WhatsappConfigService} from "./config.service";
-const fileUpload = require('express-fileupload');
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { WhatsappConfigService } from "./config.service";
+import * as fileUpload from 'express-fileupload';
 async function bootstrap() {
     const app = await NestFactory.create(AppModule, {
         logger: process.env.DEBUG != undefined ? ['log', 'debug', 'error', 'verbose', 'warn'] :
             ['log', 'error', 'warn'],
     });
-app.use(fileUpload({
-}))
+    app.use(fileUpload({
+    }))
+    app.enableCors();
     app.enableShutdownHooks();
     const options = new DocumentBuilder()
         .setTitle('WhatsApp venom API')
@@ -19,10 +20,10 @@ app.use(fileUpload({
         .addTag('device', 'Device information')
         .addTag('chatting', 'Chat methods')
         .addApiKey({
-                type: 'apiKey',
-                description: 'Your secret key',
-                name: 'X-VENOM-TOKEN'
-            }
+            type: 'apiKey',
+            description: 'Your secret key',
+            name: 'X-VENOM-TOKEN'
+        }
         )
         .build();
     const document = SwaggerModule.createDocument(app, options);
