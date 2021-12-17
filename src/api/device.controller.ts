@@ -38,9 +38,9 @@ export class DeviceController {
     // return this.whatsapp.getConnectionState();
   }
 
-  @Get('/getConnectionState')
-  getConnectionState() {
-    // return this.whatsappService.initClient('test')
+  @Post('/getConnectionState')
+  getConnectionState(@Body() message: RequestScan) {
+    return this.whatsappService.getClient(message.name).getHostDevice()
     // return this.whatsapp.getConnectionState();
   }
 

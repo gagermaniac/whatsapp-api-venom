@@ -97,6 +97,15 @@ export class WhatsappService implements OnApplicationShutdown {
       )
       this.clientList[name] = client
     }
+    console.log(client)
+    return client
+  }
+
+  public getClient(name: string): Whatsapp {
+    let client = null
+    if (typeof(this.clientList[name]) !== "undefined") {
+      client = this.clientList[name]
+    }
     return client
   }
 
