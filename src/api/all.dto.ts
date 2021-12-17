@@ -62,3 +62,10 @@ export class MessageLinkPreview {
     url: string;
     title: string;
 }
+
+export class RequestScan {
+    @ApiProperty({
+        example: 'name of request',
+    })
+    name: string;
+}
