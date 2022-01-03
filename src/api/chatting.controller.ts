@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, NotImplementedException, Post } from '@nestjs/common';
+import { Body, Controller, NotImplementedException, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import {
     Chat,
@@ -10,73 +10,73 @@ import {
     MessageReply,
     MessageText
 } from "./all.dto";
-import { Whatsapp } from "venom-bot";
+import { WhatsappService } from 'src/whatsapp.service';
 
 @Controller('api')
 @ApiTags('chatting')
 export class ChattingController {
+
     constructor(
-        // @Inject('WHATSAPP') private whatsapp: Whatsapp
-    ) {
+        private whatsappService: WhatsappService
+    ) {}
+
+    @Post('/sendContactVcard/:name')
+    sendContactVcard(@Param('name') name: string, @Body() message: MessageContactVcard) {
+        return this.whatsappService.getClient(name).sendContactVcard(message.number + '@c.us', message.contactsId, message.name)
     }
 
-    @Post('/sendContactVcard')
-    sendContactVcard(@Body() message: MessageContactVcard) {
-        // return this.whatsapp.sendContactVcard(message.number + '@c.us', message.contactsId, message.name)
-    }
-
-    @Post('/send-message')
+    @Post('/send-message/:name')
     @ApiOperation({ summary: 'Send a message message' })
-    sendText(@Body() message: MessageText) {
-        // return this.whatsapp.sendText(message.number + '@c.us', message.message)
+    sendText(@Param('name') name: string, @Body() message: MessageText) {
+        return this.whatsappService.getClient(name).sendText(message.number + '@c.us', message.message)
     }
 
-    @Post('/send-location')
-    sendLocation(@Body() message: MessageLocation) {
-        // return this.whatsapp.sendLocation(message.number + '@c.us', message.latitude, message.longitude, message.title)
+    @Post('/send-location/:name')
+    sendLocation(@Param('name') name: string, @Body() message: MessageLocation) {
+        return this.whatsappService.getClient(name).sendLocation(message.number + '@c.us', message.latitude, message.longitude, message.title)
     }
 
-    @Post('/send-linkPreview')
-    sendLinkPreview(@Body() message: MessageLinkPreview) {
-        // return this.whatsapp.sendLinkPreview(message.number + '@c.us', message.url, message.title)
+    @Post('/send-linkPreview/:name')
+    sendLinkPreview(@Param('name') name: string, @Body() message: MessageLinkPreview) {
+        return this.whatsappService.getClient(name).sendLinkPreview(message.number + '@c.us', message.url, message.title)
     }
 
-    @Post('/send-image')
+    @Post('/send-image/:name')
     @ApiOperation({ summary: 'NOT IMPLEMENTED YET' })
-    sendImage(@Body() message: MessageImage) {
-        throw new NotImplementedException();
+    sendImage(@Param('name') name: string, @Body() message: MessageImage) {
+        // throw new NotImplementedException();
         // TODO: Accept image URL, download it and then send with path
-        // return this.whatsapp.sendImage(message.number + '@c.us', message.path, message.filename, message.caption)
+        return this.whatsappService.getClient(name).sendImage(message.number + '@c.us', message.path, message.filename, message.caption)
     }
 
-    @Post('/send-file')
+    @Post('/send-file/:name')
     @ApiOperation({ summary: 'NOT IMPLEMENTED YET' })
-    sendFile(@Body() message: MessageFile) {
-        throw new NotImplementedException();
+    sendFile(@Param('name') name: string, @Body() message: MessageFile) {
+        // throw new NotImplementedException();
         // TODO: Accept File URL, download it and then send with path
-        // return this.whatsapp.sendFile(message.number + '@c.us', message.path, message.filename, message.caption)
+        return this.whatsappService.getClient(name).sendFile(message.number + '@c.us', message.path, message.filename, message.caption)
     }
 
-    @Post('/reply')
+    @Post('/reply/:name')
     @ApiOperation({ summary: 'Reply to a message message' })
-    reply(@Body() message: MessageReply) {
-        // return this.whatsapp.reply(message.number + '@c.us', message.message, message.reply_to)
+    reply(@Param('name') name: string, @Body() message: MessageReply) {
+        return this.whatsappService.getClient(name).reply(message.number + '@c.us', message.message, message.reply_to)
     }
 
-    @Post('/send-seen')
-    sendSeen(@Body() chat: Chat) {
-        // return this.whatsapp.sendSeen(chat.number)
+    @Post('/send-seen/:name')
+    sendSeen(@Param('name') name: string, @Body() chat: Chat) {
+        return this.whatsappService.getClient(name).sendSeen(chat.number)
     }
 
-    @Post('/start-typing')
-    startTyping(@Body() chat: Chat) {
+    @Post('/start-typing/:name')
+    startTyping(@Param('name') name: string, @Body() chat: Chat) {
         // It's infinitive action
         // this.whatsapp.startTyping(chat.number)
         return true
     }
 
-    @Post('/stop-typing')
-    stopTyping(@Body() chat: Chat) {
+    @Post('/stop-typing/:name')
+    stopTyping(@Param('name') name: string, @Body() chat: Chat) {
         // this.whatsapp.stopTyping(chat.number)
         return true
     }

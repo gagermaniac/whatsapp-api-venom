@@ -38,7 +38,7 @@ export const headlessClient = {
       '--disable-accelerated-video-decode',
       '--single-process', // <- this one doesn't works in Windows
     ],
-    autoClose: 0,
+    autoClose: 60000,
     createPathFileToken: true,
     multidevice: false,
     puppeteerOptions: {},

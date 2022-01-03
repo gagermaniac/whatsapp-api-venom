@@ -8,7 +8,6 @@ import { RequestScan } from './all.dto';
 @ApiTags('device')
 export class DeviceController {
   constructor(
-    // @Inject('WHATSAPP') private whatsapp: Whatsapp,
     private whatsappService: WhatsappService
   ) {}
 
@@ -17,50 +16,64 @@ export class DeviceController {
     return true;
   }
 
-  @Post('/killServiceWorker')
-  killServiceWorker() {
-    // return this.whatsapp.killServiceWorker();
+  @Post('/killServiceWorker/:name')
+  killServiceWorker(@Param('name') name: string) {
+    return this.whatsappService.getClient(name).killServiceWorker()
   }
 
-  @Post('/restartService')
-  restartService() {
-    // return this.whatsapp.restartService();
+  @Post('/restartService/:name')
+  restartService(@Param('name') name: string) {
+    return this.whatsappService.getClient(name).restartService()
   }
 
-  @Get('/getHostDevice')
-  getHostDevice() {
-    // return this.whatsapp.getHostDevice();
+  @Get('/getHostDevice/:name')
+  getHostDevice(@Param('name') name: string) {
+    return this.whatsappService.getClient(name).getHostDevice()
   }
 
   @Post('/requestScan')
   requestScan(@Body() message: RequestScan) {
     return this.whatsappService.initClient(message.name)
-    // return this.whatsapp.getConnectionState();
   }
 
-  @Post('/getConnectionState')
-  getConnectionState(@Body() message: RequestScan) {
-    return this.whatsappService.getClient(message.name).getHostDevice()
-    // return this.whatsapp.getConnectionState();
+  @Get('/getConnectionState/:name')
+  getConnectionState(@Param('name') name: string) {
+    const client = this.whatsappService.getClient(name)
+    if (client !== null) {
+      return client?.getConnectionState()
+    } else {
+      return "ERROR"
+    }
   }
 
-  @Get('/getBatteryLevel')
-  getBatteryLevel() {
-    // return this.whatsapp.getBatteryLevel();
+  @Get('/getAllConnection')
+  getAllConnection() {
+    return this.whatsappService.getAllClientConnection()
   }
 
-  @Get('/isConnected')
-  isConnected() {
-    // return this.whatsapp.isConnected();
+  @Get('/getAllClient')
+  getAllClient() {
+    return this.whatsappService.getAllClient()
   }
 
-  @Get('/getWAVersion')
-  getWAVersion() {
-    // return this.whatsapp.getWAVersion();
+  @Get('/getBatteryLevel/:name')
+  getBatteryLevel(@Param('name') name: string) {
+    return this.whatsappService.getClient(name).getBatteryLevel()
   }
 
-  @Get('/logout')
-  logout() {
-    // return this.whatsapp.logout();
+  @Get('/isConnected/:name')
+  isConnected(@Param('name') name: string) {
+    return this.whatsappService.getClient(name).isConnected()
+  }
+
+  @Get('/getWAVersion/:name')
+  getWAVersion(@Param('name') name: string) {
+    return this.whatsappService.getClient(name).getWAVersion()
+  }
+
+  @Get('/logout/:name')
+  logout(@Param('name') name: string) {
+    const client = this.whatsappService.getClient(name).close()
+    return "CLOSE"
   }
 }

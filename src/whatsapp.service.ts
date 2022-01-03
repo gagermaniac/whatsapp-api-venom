@@ -12,6 +12,8 @@ import mime = require('mime-types');
 import fs = require('fs');
 import del = require('del');
 import { DEFAULT_URL, headlessClient } from './constants';
+import { threadId } from 'worker_threads';
+import { json } from 'express';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { promisify } = require('util');
@@ -41,7 +43,6 @@ export class WhatsappService implements OnApplicationShutdown {
   public clientList: {} = {}
 
   constructor(
-    // @Inject('WHATSAPP') private whatsapp: Whatsapp,
     private config: WhatsappConfigService,
     private log: Logger,
   ) {
@@ -64,41 +65,72 @@ export class WhatsappService implements OnApplicationShutdown {
       }
 
       if (hook === ONMESSAGE_HOOK) {
-        // this.whatsapp[hook](data => this.onMessageHook(data, url));
+        for (var item in this.clientList) {
+          this.clientList[item][hook](data => this.onMessageHook(this.clientList[item], data, url))
+        }
       } else {
-        // this.whatsapp[hook](data => this.callWebhook(data, url));
+        for (var item in this.clientList) {
+          this.clientList[item][hook](data => this.callWebhook(data, url))
+        }
       }
       this.log.log(`Hook '${hook}' was enabled to url: ${url}`);
     }
     this.log.log('Webhooks were configured.');
   }
 
+  private deleteFile(src: string) {
+    if (fs.existsSync(src)) {
+      fs.unlink(src, (err) => {
+        if (err) {
+          console.log(err)
+        }
+        console.log('deleted')
+      })
+    }
+  }
+
   public async initClient(name: string) {
-    let client = null
+    let client = {}
+    let file_name = `${DEFAULT_URL}assets/qr/qr-${name}.png`
+
+    // delete qr file
+    this.deleteFile(file_name)
+
     if (typeof(this.clientList[name]) !== "undefined") {
-      client = this.clientList[name]
+      console.log("CONNECTED")
+      return "CONNECTED"
     } else {
-      client = await create(
+      return await create(
         name,
         (base64Qr, asciiQR) => {
           const base64Data = base64Qr.replace(/^data:image\/png;base64,/, '');
           fs.writeFile(
-            `${DEFAULT_URL}assets/qr-${name}.png`,
+            file_name,
             base64Data,
             'base64',
             function (err) {
             },
           )
+          // fs.writeFile('webclient.json', { name: name }, { flag: "a+" }, (err) => {
+          //   if (err) throw err;
+          //     con        sole.log('The file is created if not existing!!');
+          // }); 
         },
         statusFind => {
           console.log(statusFind);
         },
         headlessClient
       )
-      this.clientList[name] = client
+      .then((cli) => {
+        client = cli
+        this.clientList[name] = client
+        return "CONNECTED"
+      })
+      .catch((erro) => {
+        console.log(erro);
+        return "ERROR"
+      });
     }
-    console.log(client)
-    return client
   }
 
   public getClient(name: string): Whatsapp {
@@ -107,6 +139,30 @@ export class WhatsappService implements OnApplicationShutdown {
       client = this.clientList[name]
     }
     return client
+  }
+
+  public async getAllClient() {
+    let result = []
+    for (var item in this.clientList) {
+      const host = await this.getClient(item)?.getHostDevice()
+      result.push({
+        name: item,
+        id: typeof(host.id) !== "undefined" ? host.id : null
+      })
+    }
+    return result
+  }
+
+  public async getAllClientConnection() {
+    let result = []
+    for (var item in this.clientList) {
+      const conn = await this.getClient(item)?.getConnectionState()
+      result.push({
+        name: item,
+        status: conn
+      })
+    }
+    return result
   }
 
   private clean_downloads() {
@@ -146,9 +202,9 @@ export class WhatsappService implements OnApplicationShutdown {
     );
   }
 
-  private async onMessageHook(message: Message, url: string) {
+  private async onMessageHook(whatsapp:Whatsapp, message: Message, url: string) {
     if (message.isMMS || message.isMedia) {
-      this.downloadAndDecryptMedia(message).then(data =>
+      this.downloadAndDecryptMedia(whatsapp, message).then(data =>
         this.callWebhook(data, url),
       );
     } else {
@@ -156,31 +212,31 @@ export class WhatsappService implements OnApplicationShutdown {
     }
   }
 
-  private async downloadAndDecryptMedia(message: Message) {
-    // return this.whatsapp.decryptFile(message).then(async buffer => {
-    //   // Download only certain mimetypes
-    //   if (
-    //     this.mimetypes !== null &&
-    //     !this.mimetypes.some(type => message.mimetype.startsWith(type))
-    //   ) {
-    //     this.log.log(
-    //       `The message ${message.id} has ${message.mimetype} media, skip it.`,
-    //     );
-    //     message.clientUrl = '';
-    //     return message;
-    //   }
+  private async downloadAndDecryptMedia(whats :Whatsapp, message: Message) {
+    return whats.decryptFile(message).then(async buffer => {
+      // Download only certain mimetypes
+      if (
+        this.mimetypes !== null &&
+        !this.mimetypes.some(type => message.mimetype.startsWith(type))
+      ) {
+        this.log.log(
+          `The message ${message.id} has ${message.mimetype} media, skip it.`,
+        );
+        message.clientUrl = '';
+        return message;
+      }
 
-    //   this.log.log(`The message ${message.id} has media, downloading it...`);
-    //   const fileName = `${message.id}.${mime.extension(message.mimetype)}`;
-    //   const filePath = path.resolve(`${this.FILES_FOLDER}/${fileName}`);
-    //   this.log.verbose(`Writing file to ${filePath}...`);
-    //   await writeFileAsync(filePath, buffer);
-    //   this.log.log(`The file from ${message.id} has been saved to ${filePath}`);
+      this.log.log(`The message ${message.id} has media, downloading it...`);
+      const fileName = `${message.id}.${mime.extension(message.mimetype)}`;
+      const filePath = path.resolve(`${this.FILES_FOLDER}/${fileName}`);
+      this.log.verbose(`Writing file to ${filePath}...`);
+      await writeFileAsync(filePath, buffer);
+      this.log.log(`The file from ${message.id} has been saved to ${filePath}`);
 
-    //   message.clientUrl = this.config.files_url + fileName;
-    //   this.removeFile(filePath);
-    //   return message;
-    // });
+      message.clientUrl = this.config.files_url + fileName;
+      this.removeFile(filePath);
+      return message;
+    });
   }
 
   onApplicationShutdown(signal?: string): any {
